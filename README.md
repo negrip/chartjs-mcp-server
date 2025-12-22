@@ -15,7 +15,7 @@ A Model Context Protocol (MCP) server that generates beautiful charts using Char
 ## 📦 NPM Package
 
 - **Name**: `@ax-crew/chartjs-mcp-server`
-- **Version**: `3.1.5`
+- **Version**: `3.1.6`
 - **Node**: `>=18`
 - **CLI bin**: `chartjs-mcp-server`
 - **NPM**: [`@ax-crew/chartjs-mcp-server`](https://www.npmjs.com/package/@ax-crew/chartjs-mcp-server)
@@ -430,6 +430,7 @@ The server exposes one primary tool for chart generation:
 - 📚 [Chart.js Documentation](https://www.chartjs.org/docs/latest/)
 - 🔌 [Model Context Protocol](https://modelcontextprotocol.io/)
 - 🎨 [Example Charts](./examples/) - See all supported chart types
+- 📝 [Changelog](./CHANGELOG.md) - Version history and release notes
 - 🐛 [Issue Tracker](https://github.com/ax-crew/chartjs-mcp-server/issues)
 - 💬 [Discussions](https://github.com/ax-crew/chartjs-mcp-server/discussions)
 
