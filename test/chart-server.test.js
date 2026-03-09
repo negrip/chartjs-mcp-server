@@ -499,6 +499,56 @@ describe('Chart.js MCP Server - Core Functionality Tests', () => {
     });
   });
 
+  describe('JSON Output Format', () => {
+
+    test('should return chart config as JSON object', async () => {
+      const config = await loadChartConfig('bar', fallbackConfigs.bar);
+      const result = await generateChart(config, 'json');
+
+      assert(result.success, `JSON format should succeed: ${result.message}`);
+      assert(result.jsonConfig, 'Should have jsonConfig');
+      assert.strictEqual(typeof result.jsonConfig, 'object', 'jsonConfig should be an object');
+      assert.strictEqual(result.jsonConfig.type, config.type, 'Should preserve chart type');
+      assert(result.jsonConfig.data, 'Should preserve data');
+      assert(result.jsonConfig.data.datasets, 'Should preserve datasets');
+      assert(!result.buffer, 'Should not have buffer for JSON format');
+      assert(!result.htmlSnippet, 'Should not have htmlSnippet for JSON format');
+
+      console.log('✅ JSON output format returns valid config object');
+    });
+
+    test('should return JSON for all chart types', async () => {
+      const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea'];
+
+      for (const chartType of chartTypes) {
+        const config = await loadChartConfig(chartType, fallbackConfigs[chartType]);
+        if (!config) continue;
+
+        const result = await generateChart(config, 'json');
+        assert(result.success, `JSON format should succeed for ${chartType}: ${result.message}`);
+        assert(result.jsonConfig, `Should have jsonConfig for ${chartType}`);
+        assert.strictEqual(result.jsonConfig.type, chartType, `Should preserve type for ${chartType}`);
+      }
+
+      console.log('✅ JSON output format works for all chart types');
+    });
+
+    test('should strip undefined options in JSON output', async () => {
+      const config = {
+        type: 'bar',
+        data: {
+          labels: ['A', 'B'],
+          datasets: [{ label: 'Test', data: [1, 2] }]
+        },
+        options: undefined
+      };
+
+      const result = await generateChart(config, 'json');
+      assert(result.success, 'Should succeed');
+      assert(!('options' in result.jsonConfig), 'Should not include undefined options');
+    });
+  });
+
   describe('File Operations', () => {
     
     test('should create PNG file with correct format', async () => {

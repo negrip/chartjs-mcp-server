@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-03-09
+
+### Added
+- JSON output format (`outputFormat: 'json'`) for client-side chart rendering
+- Returns raw Chart.js config object instead of HTML or PNG
+- Ideal for React/Next.js apps using libraries like assistant-ui
+- Example integration with assistant-ui's `makeAssistantToolUI` (`examples/assistant-ui-integration.example.tsx`)
+- Tests for JSON output format (27 tests across 10 suites)
+
 ## [3.1.6] - 2025-12-23
 
 ### Fixed
@@ -77,11 +86,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
+- **3.2.0** - Added JSON output format for client-side rendering
 - **3.1.x** - Incremental improvements, validation, and bug fixes
 - **3.1.0** - Added interactive HTML output format
 - **3.0.0** - Initial release with PNG support
 
-[Unreleased]: https://github.com/ax-crew/chartjs-mcp-server/compare/v3.1.6...HEAD
+[Unreleased]: https://github.com/ax-crew/chartjs-mcp-server/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/ax-crew/chartjs-mcp-server/compare/v3.1.6...v3.2.0
 [3.1.6]: https://github.com/ax-crew/chartjs-mcp-server/compare/v3.1.5...v3.1.6
 [3.1.5]: https://github.com/ax-crew/chartjs-mcp-server/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/ax-crew/chartjs-mcp-server/compare/v3.1.3...v3.1.4

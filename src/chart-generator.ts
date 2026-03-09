@@ -6,12 +6,13 @@ import * as path from 'path';
 // Register Chart.js components
 Chart.register(...registerables);
 
-type OutputFormat = 'png' | 'html';
+type OutputFormat = 'png' | 'html' | 'json';
 
 type ChartGenerationSuccess = {
   success: true;
   buffer?: Buffer;           // PNG data (when format = 'png')
   htmlSnippet?: string;      // HTML div snippet (when format = 'html')
+  jsonConfig?: object;       // Chart.js config object (when format = 'json')
   pngFilePath?: string;      // PNG file path (when format = 'png' && saveToFile = true)
   message: string;
 };
@@ -73,6 +74,15 @@ export async function generateChart(
     // If options is undefined, remove it from the config (Chart.js will use defaults)
     if (cleanedConfig.options === undefined) {
       delete cleanedConfig.options;
+    }
+
+    // Handle JSON format - return raw config for client-side rendering
+    if (outputFormat === 'json') {
+      return {
+        success: true,
+        jsonConfig: cleanedConfig,
+        message: "Chart config generated successfully"
+      };
     }
 
     // Handle HTML format

@@ -15,7 +15,7 @@ A Model Context Protocol (MCP) server that generates beautiful charts using Char
 ## 📦 NPM Package
 
 - **Name**: `@ax-crew/chartjs-mcp-server`
-- **Version**: `3.1.6`
+- **Version**: `3.2.0`
 - **Node**: `>=18`
 - **CLI bin**: `chartjs-mcp-server`
 - **NPM**: [`@ax-crew/chartjs-mcp-server`](https://www.npmjs.com/package/@ax-crew/chartjs-mcp-server)
@@ -58,8 +58,9 @@ Transform your data into beautiful, professional charts instantly! This MCP serv
 - 🌟 **Polar Area Charts** - Beautiful radial visualizations
 
 All charts can be generated as:
-- 📸 **PNG Images** (800x600px) - Perfect for saving, sharing, or embedding 
+- 📸 **PNG Images** (800x600px) - Perfect for saving, sharing, or embedding
 - 🌐 **Interactive HTML** - Self-contained divs with hover tooltips and animations
+- 🧩 **JSON Config** - Raw Chart.js config for client-side rendering in React/Next.js apps
 
 ![Interactive Chart Demo](./examples/interactive.png)
 *Interactive HTML charts with hover tooltips and animations - perfect for web applications!*
@@ -230,6 +231,15 @@ You can specify the output format when creating charts:
 - Perfect for web applications and frontends
 - Just inject the HTML into any webpage
 
+**JSON Config** (New in 3.2.0)
+```
+"Create a bar chart as JSON showing quarterly revenue..."
+```
+- Returns the raw Chart.js configuration object as JSON
+- Ideal for client-side rendering in React/Next.js apps
+- Works with AI chat UIs like [assistant-ui](https://github.com/assistant-ui/assistant-ui) via `makeAssistantToolUI`
+- See [`examples/assistant-ui-integration.example.tsx`](./examples/assistant-ui-integration.example.tsx) for a full example
+
 **Example Interactive HTML Usage:**
 ```javascript
 // The AI returns HTML like this:
@@ -346,7 +356,7 @@ chartjs-mcp-server/
 We have comprehensive testing to ensure reliability:
 
 ```bash
-npm test                  # 24 tests across 9 suites
+npm test                  # 27 tests across 10 suites
 npm run test:integration  # CLI-based integration tests
 npm run test:watch        # Development watch mode
 ```
@@ -377,12 +387,13 @@ The server exposes one primary tool for chart generation:
 
 **Parameters:**
 - `chartConfig` (object) - Complete Chart.js v4 configuration
-- `outputFormat` (string, optional) - Output format: `'png'` (default) or `'html'`
+- `outputFormat` (string, optional) - Output format: `'png'` (default), `'html'`, or `'json'`
 - `saveToFile` (boolean, optional) - Save PNG to file (only applies to PNG format)
 
 **Returns:**
 - PNG Success: `{ success: true, buffer: Buffer, message: string }` or `{ success: true, pngFilePath: string, message: string }`
 - HTML Success: `{ success: true, htmlSnippet: string, message: string }`
+- JSON Success: `{ success: true, jsonConfig: object, message: string }`
 - Error: `{ success: false, error: string, message: string }`
 
 **Example:**
@@ -415,10 +426,10 @@ The server exposes one primary tool for chart generation:
 
 - ✅ **Complete MCP Server** - Ready to use with any MCP client
 - ✅ **8 Chart Types** - All major Chart.js chart types supported
-- ✅ **Dual Output Formats** - PNG images and interactive HTML divs
+- ✅ **Three Output Formats** - PNG images, interactive HTML divs, and JSON config
 - ✅ **Example Configurations** - 8 working examples in `/examples`
 - ✅ **Visual References** - Generated PNG samples for each chart type
-- ✅ **Comprehensive Tests** - 24 tests ensuring reliability
+- ✅ **Comprehensive Tests** - 27 tests ensuring reliability
 - ✅ **TypeScript Support** - Full type safety and IDE support
 - ✅ **Error Handling** - Graceful error handling and validation
 - ✅ **Documentation** - Complete setup and usage guides

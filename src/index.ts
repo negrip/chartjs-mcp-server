@@ -63,7 +63,7 @@ server.registerTool(
     description: "Generates charts using Chart.js. Can output PNG images or interactive HTML divs. Supports full Chart.js v4 configuration options.",
     inputSchema: {
       chartConfig: z.any().describe("Complete Chart.js configuration object supporting full v4 schema"),
-      outputFormat: z.enum(['png', 'html']).optional().default('png').describe("Output format: 'png' for static image, 'html' for interactive HTML div"),
+      outputFormat: z.enum(['png', 'html', 'json']).optional().default('png').describe("Output format: 'png' for static image, 'html' for interactive HTML div, 'json' for raw Chart.js config object (ideal for client-side rendering)"),
       saveToFile: z.boolean().optional().default(false).describe("Whether to save PNG to file (only applies to PNG format)")
     }
   },
@@ -88,6 +88,19 @@ server.registerTool(
     const result = await generateChart(parsedChartConfig, outputFormat, saveToFile);
 
     if (result.success) {
+      // Handle JSON format - structured config for client-side rendering
+      if (result.jsonConfig) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result.jsonConfig),
+              mimeType: "application/json"
+            }
+          ]
+        };
+      }
+
       // Handle HTML format
       if (result.htmlSnippet) {
         return {
