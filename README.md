@@ -1,460 +1,123 @@
+# ChartJS MCP Server
 
+Servidor MCP (Model Context Protocol) que genera gráficos **Chart.js v4** para agentes de
+IA. Está pensado para integrarse con **GLOB.AI OS / Globant Enterprise AI (GEAI)** a través
+de su proxy MCP, aunque funciona con cualquier cliente MCP estándar.
 
+En lugar de intentar embeber la imagen en el chat (donde muchas UIs bloquean o degradan
+las imágenes por políticas de seguridad), el server **renderiza el gráfico, guarda una
+página HTML interactiva y devuelve un link clickeable**. El usuario abre el link y ve el
+gráfico a pantalla completa, con tooltips y leyendas interactivas.
 
-# Chart.js MCP Server
-
-[![npm version](https://img.shields.io/npm/v/@ax-crew/chartjs-mcp-server.svg)](https://www.npmjs.com/package/@ax-crew/chartjs-mcp-server)
-[![npm downloads](https://img.shields.io/npm/dm/@ax-crew/chartjs-mcp-server.svg)](https://www.npmjs.com/package/@ax-crew/chartjs-mcp-server)
-[![license](https://img.shields.io/npm/l/@ax-crew/chartjs-mcp-server.svg)](./LICENSE)
-
-A Model Context Protocol (MCP) server that generates beautiful charts using Chart.js v4. Perfect for data visualization in Claude Desktop, Cursor, and other MCP-compatible applications.
-
-![Chart Examples](./examples/bubble.png)
-*Just ask "Create a bubble chart showing company performance" and get professional results instantly!*
-
-## 📦 NPM Package
-
-- **Name**: `@ax-crew/chartjs-mcp-server`
-- **Version**: `3.2.0`
-- **Node**: `>=18`
-- **CLI bin**: `chartjs-mcp-server`
-- **NPM**: [`@ax-crew/chartjs-mcp-server`](https://www.npmjs.com/package/@ax-crew/chartjs-mcp-server)
-
-### Install
-
-```bash
-# npm
-npm install -D @ax-crew/chartjs-mcp-server
-
-# pnpm
-pnpm add -D @ax-crew/chartjs-mcp-server
-
-# yarn
-yarn add -D @ax-crew/chartjs-mcp-server
-
-# bun
-bun add -d @ax-crew/chartjs-mcp-server
+```
+📈 [Ventas por trimestre — 2026](http://localhost:8123/charts/chart-U7pXnxRKq087ou18.html)
 ```
 
-### Run
+## Características
+
+- **Link interactivo** como salida principal (sin límites de tamaño de imagen ni CSP).
+- **8 tipos de gráfico**: bar, line, pie, doughnut, polarArea, radar, scatter, bubble.
+- **Servidor HTTP embebido** en el propio proceso del MCP.
+- **Configuración por `.env`** (sin dependencias externas).
+- **Seguro por diseño**: links no adivinables, sin listado de directorio, sin path
+  traversal, retención automática de archivos.
+- Formatos alternativos: `html` (snippet crudo), `json` (config validado), `svg`
+  (data URI vectorial).
+
+## Requisitos
+
+- Node.js >= 18
+- Windows / Linux / macOS
+
+Ver [REQUIREMENTS.txt](./REQUIREMENTS.txt) para el detalle.
+
+## Instalación
 
 ```bash
-# via npx (recommended for MCP clients)
-npx @ax-crew/chartjs-mcp-server
-
-# or if installed locally/globally
-chartjs-mcp-server
+git clone https://github.com/negrip/chartjs-mcp-server.git
+cd chartjs-mcp-server
+npm install
+npm run build
 ```
 
-## 🎯 What This Does
+## Configuración
 
-Transform your data into beautiful, professional charts instantly! This MCP server connects to your favorite AI applications and generates:
+Copiar la plantilla y ajustar según el entorno:
 
-- 📊 **Bar Charts** - Perfect for comparing categories
-- 📈 **Line Charts** - Great for showing trends over time  
-- 🥧 **Pie & Doughnut Charts** - Ideal for showing proportions
-- 🎯 **Scatter & Bubble Charts** - Perfect for correlation analysis
-- 🕸️ **Radar Charts** - Great for multi-dimensional comparisons
-- 🌟 **Polar Area Charts** - Beautiful radial visualizations
+```bash
+cp .env.example .env
+```
 
-All charts can be generated as:
-- 📸 **PNG Images** (800x600px) - Perfect for saving, sharing, or embedding
-- 🌐 **Interactive HTML** - Self-contained divs with hover tooltips and animations
-- 🧩 **JSON Config** - Raw Chart.js config for client-side rendering in React/Next.js apps
+| Variable | Default | Descripción |
+|---|---|---|
+| `CHARTS_OUTPUT_DIR` | `<temp>/chartjs-mcp-charts` | Dónde se guardan los HTML de los gráficos |
+| `CHARTS_HTTP_HOST` | `127.0.0.1` | Interfaz del server (`0.0.0.0` para exponer en red) |
+| `CHARTS_HTTP_PORT` | `8123` | Puerto del server (fallback automático hasta +9) |
+| `CHARTS_BASE_URL` | `http://localhost:<puerto>` | URL base de los links. **Obligatoria en servidor** |
+| `CHARTS_MAX_FILES` | `50` | Cantidad de gráficos que se conservan |
 
-![Interactive Chart Demo](./examples/interactive.png)
-*Interactive HTML charts with hover tooltips and animations - perfect for web applications!*
+## Uso en GLOB.AI OS / Globant Enterprise AI
 
-### 🖼️ See It In Action
+Esta es la guía rápida. El paso a paso completo (incluida la puesta en un servidor con
+HTTPS/reverse proxy) está en **[DEPLOYMENT.md](./DEPLOYMENT.md)**.
 
-Here's what you can create with just a simple request:
+### 1. Registrar el MCP en el proxy
 
-<table>
-<tr>
-<td align="center" width="33%">
-<img src="./examples/bar.png" alt="Bar Chart Example" width="250"/><br/>
-<strong>Bar Chart</strong><br/>
-<em>Perfect for comparisons</em>
-</td>
-<td align="center" width="33%">
-<img src="./examples/line.png" alt="Line Chart Example" width="250"/><br/>
-<strong>Line Chart</strong><br/>
-<em>Great for trends</em>
-</td>
-<td align="center" width="33%">
-<img src="./examples/pie.png" alt="Pie Chart Example" width="250"/><br/>
-<strong>Pie Chart</strong><br/>
-<em>Show proportions</em>
-</td>
-</tr>
-<tr>
-<td align="center" width="33%">
-<img src="./examples/doughnut.png" alt="Doughnut Chart Example" width="250"/><br/>
-<strong>Doughnut Chart</strong><br/>
-<em>Modern proportions</em>
-</td>
-<td align="center" width="33%">
-<img src="./examples/radar.png" alt="Radar Chart Example" width="250"/><br/>
-<strong>Radar Chart</strong><br/>
-<em>Multi-dimensional data</em>
-</td>
-<td align="center" width="33%">
-<img src="./examples/scatter.png" alt="Scatter Chart Example" width="250"/><br/>
-<strong>Scatter Chart</strong><br/>
-<em>Correlation analysis</em>
-</td>
-</tr>
-<tr>
-<td align="center" width="33%">
-<img src="./examples/bubble.png" alt="Bubble Chart Example" width="250"/><br/>
-<strong>Bubble Chart</strong><br/>
-<em>3D relationships</em>
-</td>
-<td align="center" width="33%">
-<img src="./examples/polarArea.png" alt="Polar Area Chart Example" width="250"/><br/>
-<strong>Polar Area Chart</strong><br/>
-<em>Radial visualizations</em>
-</td>
-<td align="center" width="33%">
-<em>And more chart types<br/>coming soon!</em>
-</td>
-</tr>
-</table>
+En la configuración del proxy MCP:
 
----
-
-## 🚀 For Users - Quick Setup
-
-### System Requirements
-
-- **Node.js 18+** - Required for running the MCP server
-
-### Using with Claude Desktop
-
-The simplest way to use this MCP server:
-
-1. **Configure Claude Desktop**
-   
-   Add this to your Claude Desktop configuration file:
-   
-   **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
-   
-   ```json
-   {
-     "mcpServers": {
-       "chartjs": {
-         "command": "npx",
-         "args": ["@ax-crew/chartjs-mcp-server"]
-       }
-     }
-   }
-   ```
-
-2. **Restart Claude Desktop**
-
-3. **Start Creating Charts!**
-   
-   Try asking Claude:
-   ```
-   "Create a bar chart showing sales data: Q1: $50k, Q2: $75k, Q3: $60k, Q4: $90k"
-   ```
-
-### Using with Cursor
-
-Add to your Cursor settings or workspace configuration:
 ```json
 {
   "mcpServers": {
-    "chartjs": {
-      "command": "npx",
-      "args": ["@ax-crew/chartjs-mcp-server"]
+    "ChartJS": {
+      "command": "node",
+      "args": ["/ruta/a/chartjs-mcp-server/dist/index.js"]
     }
   }
 }
 ```
 
-### Alternative: Install from Source
+Al reiniciar el proxy, la tool queda registrada como **`ChartJS__generatechart`**.
 
-If you prefer to install from source or want to contribute:
+### 2. Cargar los parámetros de la tool
 
-1. **Clone and Build**
-   ```bash
-   git clone https://github.com/ax-crew/chartjs-mcp-server.git
-   cd chartjs-mcp-server
-   npm install && npm run build
-   ```
+En *Integrations → ChartJS → Tool Parameters*, cargar a mano (el proxy no propaga el
+schema completo):
 
-2. **Configure with Local Path**
-   
-   ```json
-   {
-     "mcpServers": {
-       "chartjs": {
-         "command": "node",
-         "args": ["/full/path/to/chartjs-mcp-server/dist/index.js"]
-       }
-     }
-   }
-   ```
+| Key | Type | Data Type | Required |
+|---|---|---|---|
+| `chartConfig` | Application | **String** | ✅ |
+| `outputFormat` | Application | String | ✅ |
 
----
+Ambos deben quedar **Required** (la plataforma envía el schema con `strict: true`).
+`chartConfig` va como **String** (el server parsea el JSON internamente).
 
-## 📖 How to Use
+### 3. Adjuntar la tool al agente e instruirlo
 
-### Basic Usage
+Agregar `ChartJS__generatechart` al resource pool del agente. El agente debe: obtener
+los datos, armar el `chartConfig` con valores reales, llamar a la tool con
+`outputFormat: "interactive"`, y reproducir el link markdown tal cual lo devuelve la tool.
 
-Once configured, you can ask your AI assistant to create charts using natural language:
+En [DEPLOYMENT.md](./DEPLOYMENT.md) hay un bloque de instrucciones sugerido para el
+prompt del agente.
 
-- *"Create a pie chart of my budget: Housing 40%, Food 25%, Transport 15%, Entertainment 20%"*
-- *"Make a line chart showing website visitors over 6 months: Jan 1000, Feb 1200, Mar 1500, Apr 1300, May 1800, Jun 2100"*
-- *"Generate a bar chart comparing programming languages: JavaScript 65%, Python 45%, Java 35%, Go 25%"*
+## API de la tool
 
-### Output Formats
+`generateChart(chartConfig, outputFormat?)`
 
-You can specify the output format when creating charts:
+- **`chartConfig`** (object | JSON string, requerido): configuración completa Chart.js v4.
+- **`outputFormat`** (opcional, default `"interactive"`):
+  - `interactive` — renderiza, guarda el HTML interactivo y devuelve el link markdown.
+  - `png` — alias legacy de `interactive`.
+  - `html` — snippet HTML crudo self-contained.
+  - `json` — config Chart.js validado (para render client-side).
+  - `svg` — SVG vectorial como data URI markdown (bar/line/pie/doughnut).
 
-**PNG Images (Default)**
-```
-"Create a bar chart as a PNG image showing sales data..."
-```
-- High-quality static images (800x600px)
-- Perfect for documents, presentations, and sharing
-- Works everywhere
+## Documentación
 
-**Interactive HTML**
-```
-"Create an interactive HTML doughnut chart showing project status..."
-```
-- Self-contained HTML divs with embedded Chart.js
-- Hover tooltips and animations
-- Perfect for web applications and frontends
-- Just inject the HTML into any webpage
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** — guía completa: arquitectura, integración con
+  GLOB.AI OS paso a paso, despliegue en servidor, seguridad, troubleshooting.
+- **[REQUIREMENTS.txt](./REQUIREMENTS.txt)** — requisitos de sistema y dependencias.
 
-**JSON Config** (New in 3.2.0)
-```
-"Create a bar chart as JSON showing quarterly revenue..."
-```
-- Returns the raw Chart.js configuration object as JSON
-- Ideal for client-side rendering in React/Next.js apps
-- Works with AI chat UIs like [assistant-ui](https://github.com/assistant-ui/assistant-ui) via `makeAssistantToolUI`
-- See [`examples/assistant-ui-integration.example.tsx`](./examples/assistant-ui-integration.example.tsx) for a full example
+## Licencia
 
-**Example Interactive HTML Usage:**
-```javascript
-// The AI returns HTML like this:
-const chartHtml = `<div id="chart-container-123">...</div>`;
-
-// You can inject it anywhere:
-document.getElementById('dashboard').innerHTML = chartHtml;
-
-// Works with any framework
-// React: <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
-// Vue: <div v-html="chartHtml"></div>
-// Angular: <div [innerHTML]="chartHtml"></div>
-```
-
-### Chart Types Available
-
-| Chart Type | Best For | Example Use Case |
-|------------|----------|------------------|
-| **Bar** | Comparing categories | Sales by region, survey results |
-| **Line** | Trends over time | Stock prices, website traffic |
-| **Pie** | Parts of a whole | Budget breakdown, market share |
-| **Doughnut** | Proportions with focus | Same as pie, but more modern look |
-| **Scatter** | Correlation analysis | Height vs weight, sales vs advertising |
-| **Bubble** | 3D relationships | Revenue vs profit vs company size |
-| **Radar** | Multi-factor comparison | Skill assessments, product features |
-| **Polar Area** | Radial data | Seasonal data, directional analysis |
-
-### Advanced Features
-
-- 🎨 **Custom Colors**: Specify color schemes for your brand
-- 📊 **Multiple Datasets**: Compare multiple data series
-- 🏷️ **Labels & Titles**: Add context with custom labels
-- 📱 **Responsive**: Charts work great at any size
-- 🎛️ **Chart.js Options**: Full access to Chart.js v4 features
-- 🖱️ **Interactive Elements**: Tooltips, hover effects, and animations (HTML format)
-- 🔗 **Framework Agnostic**: HTML output works with React, Vue, Angular, and vanilla JS
-
----
-
-## 🛠️ Troubleshooting
-
-### Common Issues
-
-**Chart not generating?**
-- Check that the MCP server is properly configured in your client
-- Verify the server is running: `ps aux | grep chartjs`
-- Try restarting your MCP client (Claude Desktop, Cursor, etc.)
-
-**Configuration not working?**
-- Check JSON syntax in your config file
-- Ensure file paths are correct
-- Check file permissions
-
-**Charts look wrong?**
-- Verify your data format matches Chart.js requirements
-- Check for missing required fields (labels, datasets, etc.)
-- Try a simpler chart first to test the connection
-
-### Getting Help
-
-1. **Check the [examples](./examples/)** - See working chart configurations
-2. **Run tests** - `npm test` to verify everything works
-3. **Check logs** - Look for error messages in your MCP client
-4. **Open an issue** - We're here to help!
-
----
-
-## 🔧 For Developers - Contributing
-
-Want to improve this MCP server? We welcome contributions!
-
-### Development Setup
-
-```bash
-# Clone and setup
-git clone https://github.com/ax-crew/chartjs-mcp-server.git
-cd chartjs-mcp-server
-npm install
-
-# Development workflow
-npm run dev          # Watch mode for development
-npm test            # Run tests
-npm run build       # Build for production
-npm run test:watch  # Test in watch mode
-```
-
-### Project Structure
-
-```
-chartjs-mcp-server/
-├── src/
-│   ├── index.ts           # Main MCP server implementation
-│   └── chart-schema.json  # Chart.js v4 validation schema
-├── examples/              # Example configurations & outputs
-│   ├── *.json            # Chart configuration examples
-│   ├── *.png             # Generated chart images
-│   └── README.md         # Developer examples guide
-├── test/
-│   └── chart-server.test.js # Comprehensive test suite
-├── package.json          # Dependencies and scripts
-└── tsconfig.json         # TypeScript configuration
-```
-
-### Key Technologies
-
-- **TypeScript** - Type-safe development
-- **Chart.js v4** - Chart generation engine
-- **Node Canvas** - Server-side rendering
-- **MCP Protocol** - Model Context Protocol implementation
-- **Node.js Test Runner** - Native testing (no external deps)
-
-### Testing
-
-We have comprehensive testing to ensure reliability:
-
-```bash
-npm test                  # 27 tests across 10 suites
-npm run test:integration  # CLI-based integration tests
-npm run test:watch        # Development watch mode
-```
-
-### Adding New Features
-
-1. **Add chart type support** in `src/index.ts`
-2. **Create example configuration** in `examples/`
-3. **Add tests** in `test/chart-server.test.js`
-4. **Update documentation** in both READMEs
-5. **Submit a pull request**
-
-### Code Standards
-
-- ✅ TypeScript with strict mode
-- ✅ Comprehensive error handling
-- ✅ Test coverage for all features
-- ✅ Clear, documented code
-- ✅ MCP protocol compliance
-
----
-
-## 📋 API Reference
-
-### MCP Tool: `generateChart`
-
-The server exposes one primary tool for chart generation:
-
-**Parameters:**
-- `chartConfig` (object) - Complete Chart.js v4 configuration
-- `outputFormat` (string, optional) - Output format: `'png'` (default), `'html'`, or `'json'`
-- `saveToFile` (boolean, optional) - Save PNG to file (only applies to PNG format)
-
-**Returns:**
-- PNG Success: `{ success: true, buffer: Buffer, message: string }` or `{ success: true, pngFilePath: string, message: string }`
-- HTML Success: `{ success: true, htmlSnippet: string, message: string }`
-- JSON Success: `{ success: true, jsonConfig: object, message: string }`
-- Error: `{ success: false, error: string, message: string }`
-
-**Example:**
-```json
-{
-  "type": "bar",
-  "data": {
-    "labels": ["Q1", "Q2", "Q3", "Q4"],
-    "datasets": [{
-      "label": "Sales",
-      "data": [50000, 75000, 60000, 90000],
-      "backgroundColor": "rgba(54, 162, 235, 0.8)"
-    }]
-  },
-  "options": {
-    "responsive": true,
-    "plugins": {
-      "title": {
-        "display": true,
-        "text": "Quarterly Sales"
-      }
-    }
-  }
-}
-```
-
----
-
-## 📦 What's Included
-
-- ✅ **Complete MCP Server** - Ready to use with any MCP client
-- ✅ **8 Chart Types** - All major Chart.js chart types supported
-- ✅ **Three Output Formats** - PNG images, interactive HTML divs, and JSON config
-- ✅ **Example Configurations** - 8 working examples in `/examples`
-- ✅ **Visual References** - Generated PNG samples for each chart type
-- ✅ **Comprehensive Tests** - 27 tests ensuring reliability
-- ✅ **TypeScript Support** - Full type safety and IDE support
-- ✅ **Error Handling** - Graceful error handling and validation
-- ✅ **Documentation** - Complete setup and usage guides
-
----
-
-## 🔗 Resources
-
-- 📚 [Chart.js Documentation](https://www.chartjs.org/docs/latest/)
-- 🔌 [Model Context Protocol](https://modelcontextprotocol.io/)
-- 🎨 [Example Charts](./examples/) - See all supported chart types
-- 📝 [Changelog](./CHANGELOG.md) - Version history and release notes
-- 🐛 [Issue Tracker](https://github.com/ax-crew/chartjs-mcp-server/issues)
-- 💬 [Discussions](https://github.com/ax-crew/chartjs-mcp-server/discussions)
-
----
-
-## 📄 License
-
-MIT License - feel free to use this in your projects!
-
----
-
-## 🌟 Star This Repo!
-
-If this MCP server helps you create amazing charts, please give it a star ⭐ to help others discover it!
-
-**Made with ❤️ for the MCP community** 
+MIT — ver [LICENSE](./LICENSE).

@@ -62,3 +62,8 @@ temp/
 
 # Release
 .npmrc
+# Dev artifacts / scripts de prueba (no versionar)
+gen_all.mjs
+probe_mcp.mjs
+graficos/
+charts/

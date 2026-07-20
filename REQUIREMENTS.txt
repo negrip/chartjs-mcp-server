@@ -1,0 +1,45 @@
+# ChartJS MCP Server — Requisitos
+# ================================
+# Nota: este es un proyecto Node.js. Las dependencias exactas se instalan con
+# `npm install` (quedan definidas en package.json / package-lock.json).
+# Este archivo documenta los requisitos de sistema y las dependencias clave.
+
+## Sistema
+- Node.js >= 18.0.0
+- npm (incluido con Node.js)
+- SO: Windows, Linux o macOS (x64/arm64)
+  * canvas y sharp instalan binarios precompilados en las plataformas comunes.
+    En distros Linux minimas pueden requerirse libs del sistema (ver docs de
+    node-canvas: libcairo2, libpango, libjpeg, libgif).
+
+## Dependencias de runtime (npm install)
+@modelcontextprotocol/sdk  ^1.13.3   # protocolo MCP (stdio)
+canvas                     ^3.1.2    # render server-side del chart (validacion)
+chart.js                   ^4.5.0    # motor de graficos
+sharp                      ^0.35.3   # compresion PNG (paleta indexada)
+zod                        ^3.23.8   # validacion del schema de la tool
+
+## Dependencias de desarrollo
+typescript                 ^5.8.3
+ts-node                    ^10.9.2
+nodemon                    ^3.1.10
+@types/node                ^24.0.10
+
+## Build
+npm install
+npm run build          # compila src/ -> dist/ (tsc)
+
+## Red / infraestructura
+- Un puerto TCP libre para el chart server (default 8123; fallback 8124-8132).
+- Los navegadores de los usuarios deben poder alcanzar ese puerto
+  (localhost en desarrollo; URL publica via CHARTS_BASE_URL en produccion).
+- Recomendado en produccion: reverse proxy con TLS (nginx / Caddy / IIS+ARR).
+
+## Configuracion (opcional — ver DEPLOYMENT.md)
+# Copiar .env.example a .env en la raiz del proyecto y ajustar.
+# Variables de entorno del sistema tienen prioridad sobre el .env.
+CHARTS_OUTPUT_DIR      # default: <temp del sistema>/chartjs-mcp-charts
+CHARTS_HTTP_HOST       # default: 127.0.0.1
+CHARTS_HTTP_PORT       # default: 8123
+CHARTS_BASE_URL        # default: http://localhost:<puerto> — OBLIGATORIA en server
+CHARTS_MAX_FILES       # default: 50

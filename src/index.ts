@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 
+import { loadDotEnv } from './env.js';
+// Cargar .env ANTES de importar módulos que leen process.env.
+loadDotEnv();
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { generateChart } from './chart-generator.js';
+import { ensureChartServer, getBaseUrl } from './chart-server.js';
 
 // Create MCP server instance
 const server = new McpServer({
@@ -62,12 +67,11 @@ server.registerTool(
     title: "Generate Chart",
     description: "Generates charts using Chart.js. Can output PNG images or interactive HTML divs. Supports full Chart.js v4 configuration options.",
     inputSchema: {
-      chartConfig: z.any().describe("Complete Chart.js configuration object supporting full v4 schema"),
-      outputFormat: z.enum(['png', 'html', 'json']).optional().default('png').describe("Output format: 'png' for static image, 'html' for interactive HTML div, 'json' for raw Chart.js config object (ideal for client-side rendering)"),
-      saveToFile: z.boolean().optional().default(false).describe("Whether to save PNG to file (only applies to PNG format)")
+      chartConfig: z.union([z.record(z.any()), z.string()]).describe("Complete Chart.js configuration object supporting full v4 schema (accepts a JSON object or a JSON string)"),
+      outputFormat: z.enum(['interactive', 'png', 'html', 'json', 'svg']).optional().default('interactive').describe("Output format: 'interactive' (default, recommended for chat agents) renders the chart and returns a clickable markdown link to a full-screen interactive page; 'png' is a legacy alias of 'interactive'; 'html' returns a raw self-contained HTML snippet; 'json' returns the validated Chart.js config; 'svg' returns a vector image as a markdown data URI")
     }
   },
-  async ({ chartConfig, outputFormat, saveToFile }) => {
+  async ({ chartConfig, outputFormat }) => {
     // Validate chart configuration first and get parsed config
     let parsedChartConfig;
     try {
@@ -85,7 +89,10 @@ server.registerTool(
       };
     }
 
-    const result = await generateChart(parsedChartConfig, outputFormat, saveToFile);
+    // 'png' queda como alias legacy del formato principal 'interactive'.
+    const normalizedFormat = outputFormat === 'png' ? 'interactive' : outputFormat;
+
+    const result = await generateChart(parsedChartConfig, normalizedFormat);
 
     if (result.success) {
       // Handle JSON format - structured config for client-side rendering
@@ -114,25 +121,53 @@ server.registerTool(
         };
       }
 
-      // Handle PNG format
-      if (result.buffer) {
-        // Return base64 image data
-        return {
-          content: [
-            { 
-              type: "image", 
-              data: result.buffer.toString('base64'), 
-              mimeType: "image/png" 
-            }
-          ]
-        };
-      } else if (result.pngFilePath) {
-        // Return file path
+      // Handle SVG format — inline as a Markdown data URI. SVG is text, so we
+      // base64-encode it to survive any downstream serialization that might
+      // mangle raw markup, at a modest size cost (~35%).
+      if (result.svgSource) {
+        const base64 = Buffer.from(result.svgSource, 'utf8').toString('base64');
         return {
           content: [
             {
               type: 'text',
-              text: result.pngFilePath
+              text: `![chart](data:image/svg+xml;base64,${base64})`,
+              mimeType: 'text/markdown'
+            }
+          ]
+        };
+      }
+
+      // Handle 'interactive' format (default)
+      if (result.buffer) {
+        // Sin imagen inline (varias UIs de chat bloquean o degradan data URIs
+        // grandes). El chart interactivo se sirve desde el HTTP server
+        // embebido y devolvemos un link markdown clickeable.
+        const htmlFileName = (result as any).htmlFileName as string | undefined;
+        // Texto del link = titulo del chart, para que con varios graficos en
+        // una misma respuesta el usuario sepa cual es cual.
+        const chartTitle = (parsedChartConfig as any)?.options?.plugins?.title?.text;
+        const linkText = typeof chartTitle === 'string' && chartTitle.trim()
+          ? chartTitle.trim().replace(/[\[\]]/g, '')
+          : 'Abrir gráfico interactivo';
+        let text: string;
+        if (htmlFileName) {
+          try {
+            await ensureChartServer();
+            const url = `${getBaseUrl()}/charts/${htmlFileName}`;
+            text = `📈 [${linkText}](${url})`;
+          } catch (serverError) {
+            // Server no disponible: al menos informamos el archivo local.
+            text = `📈 Gráfico generado: \`${htmlFileName}\` en el directorio de charts (no se pudo iniciar el servidor HTTP: ${serverError instanceof Error ? serverError.message : serverError})`;
+          }
+        } else {
+          text = 'Gráfico generado, pero no se pudo guardar el archivo HTML local.';
+        }
+        return {
+          content: [
+            {
+              type: 'text',
+              text,
+              mimeType: 'text/markdown'
             }
           ]
         };

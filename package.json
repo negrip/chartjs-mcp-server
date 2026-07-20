@@ -1,6 +1,6 @@
 {
-  "name": "@ax-crew/chartjs-mcp-server",
-  "description": "A Model Context Protocol server for generating beautiful charts using Chart.js v4. Perfect for Claude Desktop, Cursor, and other MCP clients.",
+  "name": "chartjs-mcp-server",
+  "description": "MCP server que genera gráficos Chart.js v4 y los expone como links interactivos. Pensado para GLOB.AI OS / Globant Enterprise AI y cualquier cliente MCP estándar.",
   "version": "3.2.0",
   "type": "module",
   "main": "dist/index.js",
@@ -35,21 +35,20 @@
     "charts",
     "chartjs",
     "visualization",
-    "claude",
-    "cursor",
     "data-visualization",
-    "ai-tools",
+    "geai",
+    "globant",
     "typescript"
   ],
-  "author": "@amitdeshmukh",
+  "author": "negrip",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ax-crew/chartjs-mcp-server.git"
+    "url": "https://github.com/negrip/chartjs-mcp-server.git"
   },
-  "homepage": "https://github.com/ax-crew/chartjs-mcp-server#readme",
+  "homepage": "https://github.com/negrip/chartjs-mcp-server#readme",
   "bugs": {
-    "url": "https://github.com/ax-crew/chartjs-mcp-server/issues"
+    "url": "https://github.com/negrip/chartjs-mcp-server/issues"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -61,6 +60,7 @@
     "@modelcontextprotocol/sdk": "^1.13.3",
     "canvas": "^3.1.2",
     "chart.js": "^4.5.0",
+    "sharp": "^0.35.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
