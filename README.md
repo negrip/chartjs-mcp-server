@@ -4,6 +4,13 @@ Servidor MCP (Model Context Protocol) que genera gráficos **Chart.js v4** para 
 IA. Está pensado para integrarse con **GLOB.AI OS / Globant Enterprise AI (GEAI)** a través
 de su proxy MCP, aunque funciona con cualquier cliente MCP estándar.
 
+> Esta versión parte del proyecto de código abierto
+> [ax-crew/chartjs-mcp-server](https://github.com/ax-crew/chartjs-mcp-server) (MIT) y lo
+> adapta para funcionar con **GLOB.AI OS / Globant Enterprise AI**: cambia la salida de
+> imagen embebida por un **link a un gráfico interactivo** servido por un HTTP server
+> propio, ajusta el esquema de la tool para el proxy de GEAI y agrega configuración por
+> `.env`, entre otras mejoras. El detalle de los cambios está al final de este README.
+
 En lugar de intentar embeber la imagen en el chat (donde muchas UIs bloquean o degradan
 las imágenes por políticas de seguridad), el server **renderiza el gráfico, guarda una
 página HTML interactiva y devuelve un link clickeable**. El usuario abre el link y ve el
@@ -118,6 +125,24 @@ prompt del agente.
   GLOB.AI OS paso a paso, despliegue en servidor, seguridad, troubleshooting.
 - **[REQUIREMENTS.txt](./REQUIREMENTS.txt)** — requisitos de sistema y dependencias.
 
+## Cambios respecto del proyecto original
+
+Este proyecto deriva de [ax-crew/chartjs-mcp-server](https://github.com/ax-crew/chartjs-mcp-server).
+Principales adaptaciones para su uso con GLOB.AI OS / GEAI:
+
+- **Salida como link a un gráfico interactivo** (servidor HTTP embebido), en lugar de la
+  imagen embebida — evita las restricciones de CSP y de tamaño de data URI de las UIs de chat.
+- **`chartConfig` acepta objeto o JSON string**, con `type` declarado en el esquema para
+  que el proxy de GEAI lo propague correctamente al modelo.
+- **Respuesta como texto/markdown** (compatibilidad con proxies MCP que descartan contenido
+  de tipo imagen).
+- **Formato principal `interactive`** (con `png` como alias); nuevo formato `svg` con
+  renderer vectorial propio.
+- **Configuración por `.env`** sin dependencias externas.
+- Mejoras internas: compresión de PNG, liberación de recursos por render, escapes de HTML,
+  identificadores de archivo no adivinables y retención automática.
+
 ## Licencia
 
-MIT — ver [LICENSE](./LICENSE).
+MIT — ver [LICENSE](./LICENSE). Se conserva la licencia y el aviso de copyright del
+proyecto original.
